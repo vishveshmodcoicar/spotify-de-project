@@ -35,27 +35,7 @@ song_artist_pairs = [
     {"artist": "Drake", "song": "God's Plan"},
     {"artist": "Taylor Swift", "song": "Love Story"},
     {"artist": "Ed Sheeran", "song": "Shape of You"},
-    {"artist": "Kanye West", "song": "Stronger"},
-    {"artist": "Arijit Singh", "song": "Tum Hi Ho"},
-{"artist": "Arijit Singh", "song": "Kesariya"},
-{"artist": "A. R. Rahman", "song": "Jai Ho"},
-{"artist": "A. R. Rahman", "song": "Kun Faya Kun"},
-{"artist": "Atif Aslam", "song": "Tera Hone Laga Hoon"},
-{"artist": "Atif Aslam", "song": "Dil Diyan Gallan"},
-{"artist": "Shreya Ghoshal", "song": "Agar Tum Mil Jao"},
-{"artist": "Shreya Ghoshal", "song": "Sun Raha Hai"},
-{"artist": "Badshah", "song": "DJ Waley Babu"},
-{"artist": "Badshah", "song": "Kala Chashma"},
-{"artist": "Neha Kakkar", "song": "Aankh Marey"},
-{"artist": "Yo Yo Honey Singh", "song": "Brown Rang"},
-{"artist": "Diljit Dosanjh", "song": "Do You Know"},
-{"artist": "Diljit Dosanjh", "song": "Lover"},
-{"artist": "Vishal-Shekhar", "song": "Swag Se Swagat"},
-{"artist": "KK", "song": "Khuda Jaane"},
-{"artist": "Sonu Nigam", "song": "Kal Ho Naa Ho"},
-{"artist": "Mohit Chauhan", "song": "Tum Se Hi"},
-{"artist": "Udit Narayan", "song": "Pehla Nasha"},
-{"artist": "Lata Mangeshkar", "song": "Lag Ja Gale"},
+    {"artist": "Kanye West", "song": "Stronger"}
 ]
 
 for pair in song_artist_pairs:
