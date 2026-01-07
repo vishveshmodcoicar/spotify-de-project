@@ -5,7 +5,7 @@ import uuid
 import random
 from faker import Faker
 from datetime import datetime
-from kafka import KafkaProducer
+from confluent_kafka import Producer
 from dotenv import load_dotenv
 
 # --------------------------------------------
@@ -13,21 +13,24 @@ from dotenv import load_dotenv
 # --------------------------------------------
 load_dotenv()
 
-KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:29092")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "spotify-events")
 USER_COUNT = int(os.getenv("USER_COUNT", 20))
 EVENT_INTERVAL_SECONDS = int(os.getenv("EVENT_INTERVAL_SECONDS", 1))
 
 fake = Faker()
 
-# Kafka Producer
-producer = KafkaProducer(
-    bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS],
-    value_serializer=lambda v: json.dumps(v).encode("utf-8")
-)
+# --------------------------------------------
+# Kafka Producer (confluent-kafka)
+# --------------------------------------------
+producer = Producer({
+    "bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS,
+    "linger.ms": 10,
+    "acks": "all"
+})
 
 # --------------------------------------------
-# Stable Song/Artist Definitions
+# Stable Song / Artist Definitions
 # --------------------------------------------
 song_artist_pairs = [
     {"artist": "The Weeknd", "song": "Blinding Lights"},
@@ -49,6 +52,9 @@ event_types = ["play", "pause", "skip", "add_to_playlist"]
 # Generate random users
 user_ids = [str(uuid.uuid4()) for _ in range(USER_COUNT)]
 
+# --------------------------------------------
+# Event Generator
+# --------------------------------------------
 def generate_event():
     pair = random.choice(song_artist_pairs)
     user_id = random.choice(user_ids)
@@ -64,14 +70,54 @@ def generate_event():
         "timestamp": datetime.utcnow().isoformat() + "Z"
     }
 
+# --------------------------------------------
+# Delivery Report Callback (optional but useful)
+# --------------------------------------------
+def delivery_report(err, msg):
+    if err is not None:
+        print(f"Delivery failed: {err}")
+    else:
+        print(
+            f"Delivered to {msg.topic()} "
+            f"[partition {msg.partition()}] "
+            f"@ offset {msg.offset()}"
+        )
+
+# --------------------------------------------
+# Main Loop
+# --------------------------------------------
 if __name__ == "__main__":
-    print("🎧 Starting Spotify data simulator...")
+    print("Starting Spotify data simulator...")
     print(f"Using {len(song_artist_pairs)} songs and {len(user_ids)} users.")
+    print(f"Kafka bootstrap servers: {KAFKA_BOOTSTRAP_SERVERS}")
+
     for p in song_artist_pairs:
         print(f"{p['song']} — {p['artist']} -> song_id={p['song_id']}")
 
-    while True:
-        event = generate_event()
-        producer.send(KAFKA_TOPIC, event)
-        print(f"Produced event: {event['event_type']} - {event['song_name']} by {event['artist_name']} (user {event['user_id']})")
-        time.sleep(EVENT_INTERVAL_SECONDS)
+    try:
+        while True:
+            event = generate_event()
+
+            producer.produce(
+                topic=KAFKA_TOPIC,
+                value=json.dumps(event).encode("utf-8"),
+                on_delivery=delivery_report
+            )
+
+            # Serve delivery callbacks
+            producer.poll(0)
+
+            print(
+                f"Produced event: {event['event_type']} - "
+                f"{event['song_name']} by {event['artist_name']} "
+                f"(user {event['user_id']})"
+            )
+
+            time.sleep(EVENT_INTERVAL_SECONDS)
+
+    except KeyboardInterrupt:
+        print("Stopping producer...")
+
+    finally:
+        producer.flush()
+        print("Producer closed cleanly.")
