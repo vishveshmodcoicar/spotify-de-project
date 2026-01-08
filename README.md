@@ -4,15 +4,14 @@ Spotify Real-Time Data Engineering Pipeline (End-to-End)
 
 Architecture Diagram
 
-graph LR
-    A[Spotify Event Simulator<br/>Python] --> B[Kafka Broker]
-    B --> C[Kafka Consumer<br/>Confluent Kafka]
-    C --> D[MinIO Object Storage<br/>Bronze Layer]
-    D --> E[dbt Transformations]
-    E --> F[Silver Layer]
-    F --> G[Gold Layer]
-    G --> H[Snowflake / BI / Dashboards]
-    E -->|Orchestrated by| I[Airflow]
+A[Spotify Event Simulator, Python] --> B[Kafka Broker]
+B --> C[Kafka Consumer, Confluent Kafka]
+C --> D[MinIO Object Storage, Bronze Layer]
+D --> E[dbt Transformations]
+E --> F[Silver Layer]
+F --> G[Gold Layer]
+G --> H[Snowflake / BI / Dashboards]
+E -->|Orchestrated by| I[Airflow]
 
 This diagram represents the functional flow of data, not just the tools involved. Each component is decoupled, scalable, and replaceable, which is a core principle of modern data platforms.
 
